@@ -1,36 +1,30 @@
-// Navix.js - FULL CODE WITH VOICE FILTER AND PITCH ADJUSTMENT
 
-// -----------------------------------------------------------------
-// 1. VOICE SETUP
-// -----------------------------------------------------------------
+
+
+// VOICE SETUP
+
 const synth = window.speechSynthesis;
 let selectedVoice = null;
 
-// Names of female-sounding voices common on macOS and Chrome
+
 const preferredFemaleVoiceNames = [
-    "Samantha", // Common macOS voice
-    "Susan",    // Common macOS voice
+    "Samantha", 
+    "Susan",    
     "Google UK English Female", 
-    "Google US English" // Often a female default, or you might find "Google US English Female"
+    "Google US English" 
 ];
 
-// Function to load and select a voice
 function loadVoices() {
     const voices = synth.getVoices();
-    
-    // 1. Try to find a voice by a preferred female name
     const foundVoice = voices.find(voice => 
         voice.lang.startsWith('en') && 
         preferredFemaleVoiceNames.some(name => voice.name.includes(name))
     );
-    
-    // 2. Fallback: If a preferred name is not found, default to the first English voice
     const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
 
     if (foundVoice) {
         selectedVoice = foundVoice;
     } else if (englishVoices.length > 0) {
-        // Fallback to the first available English voice
         selectedVoice = englishVoices[0]; 
     } else {
         console.warn("No English voices found. Using browser default.");
@@ -41,32 +35,23 @@ function loadVoices() {
     }
 }
 
-// Event listener to ensure voices are loaded
 if (synth.onvoiceschanged !== undefined) {
     synth.onvoiceschanged = loadVoices;
 } else {
     loadVoices();
 }
 
-// -----------------------------------------------------------------
-// 2. MAIN APPLICATION LOGIC
-// -----------------------------------------------------------------
-
-// Speech recognition setup
+// MAIN APPLICATION LOGIC
 const recognition = new (window.SpeechRecognition ||
     window.webkitSpeechRecognition)();
   recognition.lang = "en-US";
   const btn = document.querySelector("#listen-btn");
   
-  // Attach click event listener to the button
   btn.addEventListener("click", function () {
     
-    // Function to convert text to speech
     function speak(text) {
       const utterance = new SpeechSynthesisUtterance(text);
-      
-      // APPLY THE SELECTED VOICE
-      if (selectedVoice) {
+            if (selectedVoice) {
           utterance.voice = selectedVoice;
       }
       
@@ -125,7 +110,6 @@ const recognition = new (window.SpeechRecognition ||
       }
     }
   
-    // Initial Greeting and Start
     speak("Hello, I am Navix .  How may I assist you?");
 
     setTimeout(() => {
@@ -134,14 +118,12 @@ const recognition = new (window.SpeechRecognition ||
       recognition.start();
     }, 4000); 
   
-    // When a result is received
     recognition.onresult = (event) => {
       recognition.stop(); 
       const command = event.results[0][0].transcript.toLowerCase();
       handleCommand(command);
     };
   
-    // When recognition ends
     recognition.onend = () => {
       btn.innerHTML = "🎙️ Start Listening";
       btn.classList.remove("listening");
